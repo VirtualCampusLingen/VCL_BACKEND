@@ -1,0 +1,36 @@
+@import url('bootstrap.css');
+@import url('bootstrap-responsive.css');
+@import url('ios_checkbox.css');
+
+body{
+  background-color: grey;
+}
+
+.container{
+  background-color: lightgray;
+  text-align: center;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
+.container-body {
+  padding: 10px 0px 10px 0px;
+}
+
+.row-fluid {
+  margin: 5px 0px 5px 0px;
+}
+
+.info-box {
+  font-style: italic;
+}
+
+.appStateOn {
+  font-weight: bold;
+  color: green;
+}
+
+.appStateOff {
+  font-weight: bold;
+  color: red;
+}
