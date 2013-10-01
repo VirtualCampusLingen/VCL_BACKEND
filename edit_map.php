@@ -63,8 +63,21 @@
 
     <div class="container">
       <!-- Example row of columns -->
-	//Karte? Feldker?
 
+      <map name="map" id="map">
+      <area id="uebersichts_map_area" 
+        shape="poly" 
+        coords="234,144,235,145,4,143,4,154,233,155,232,304,243,304,244,155,539,155,539,302,550,302,549,154,778,154,776,143,549,144,549,1,537,1,538,144,244,144,244,1,234,1,234,146" 
+        href="#" 
+        alt="" />
+      </map>
+      <img src="assets/img/uebersichtskarte.jpg"  border="0" alt="Übersichtskarte" title="" usemap="#map" id="uebersichts_map" />
+      
+      <form>
+        X<input type="text" name="xCoord" id="uebersichts_map_X">
+        Y<input type="text" name="yCoord" id="uebersichts_map_Y">
+        <button class="btn btn-success">Speichern</button>
+      </form>
       <hr>
 
       <footer>
