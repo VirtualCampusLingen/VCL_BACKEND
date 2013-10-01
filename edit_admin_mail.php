@@ -1,3 +1,51 @@
+<?php
+
+/**
+ * Basisverzeichnis ohne abschliessendem Slash
+ */
+$DOCUMENT_ROOT = dirname(__FILE__);
+
+// Zugangsdaten für MySQL
+$MYSQL_host = 'localhost';
+$MYSQL_user = '...';
+$MYSQL_passw = '...';
+$db = '...';
+
+/**
+ * Datenbankverbindung herstellen
+ */
+$tools_dir = $DOCUMENT_ROOT . "/tools/";
+include_once($tools_dir . "connect.php");
+include_once($tools_dir . "sql.php");
+$dblk = connect($MYSQL_host, $MYSQL_user, $MYSQL_passw, $db);
+
+$error = 0;
+
+if(!empty($_POST['mail_1']) && !empty($_POST['mail_2'])){
+	//Mail gleich
+	if($_POST['mail_1']==$_POST['mail_2']){
+		//Update in der Datenbank
+		sql("UPDATE `admin` SET `E_MAIL` = '". mysql_real_escape_string($_POST['mail_1'])."' WHERE `AdminID` = 1");
+		$mail_admin = $_POST['mail_1'];
+	}
+	else{
+		$error = 1;
+	}
+}
+elseif((empty($_POST['mail_1'])||empty($_POST['mail_2']))|| $error = 1){
+
+/**
+ * Email vom Admin
+ */
+$result = sql("SELECT `E_Mail` FROM `admin`");
+$mail_admin = mysql_fetch_assoc($result);
+$mail_admin = $mail_admin['E_Mail'];
+
+}
+printf($error);
+
+?>
+
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -56,20 +104,21 @@
 
     <div class="jumbotron" style="padding: 10px 0px 10px 0px;">
       <div class="container">
-		<h2>Email des Administrators ändern - zurzeit "MAIL"</h2>
+		<h1 style="color:red;">Datenbankabfragen noch nicht ok</h1>
+		<h2>Email des Administrators ändern - zurzeit "<?=$mail_admin?>"</h2>
       </div>
     </div>
 
     <div class="container">
 		<div>
 		
-		<form class="navbar-form pull-left">  
+		<form class="navbar-form pull-left" method="POST">  
 		  <b>Neues Email:</b><br/>
-		  <input type="text" class="" placeholder="Email...">
+		  <input type="text" class="" name="mail_1" placeholder="Email...">
 		  <br/>
 		  <br/>
 		  <b>Neues Email bestätigen:</b><br/>  
-		  <input type="text" class="" placeholder="Email...">
+		  <input type="text" class="" name="mail_2"placeholder="Email...">
 		  <br/>  
 		  <br/>
 		  <button type="submit" class="btn">Ändern</button>  
