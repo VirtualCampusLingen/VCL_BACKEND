@@ -38,12 +38,12 @@
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="index.html">Home</a></li>
-			<li class="dropdown">
+            <li><a href="index.html">Home</a></li>
+			<li class="active" class="dropdown">
 				<a href="edit_admin.php" class="dropdown-toggle" data-toggle="dropdown">Administration <b class="caret"></b></a>
 				 <ul class="dropdown-menu">
 					<li><a href="edit_admin_pw.php">Passwort ändern</a></li>
-					<li><a href="edit_admin_mail.php">Email ändern</a></li>
+					<li class="active"><a href="edit_admin_mail.php">Email ändern</a></li>
               </ul>	
 			</li>
             <li><a href="edit_infotext.php">Infotexte</a></li>
@@ -54,34 +54,28 @@
       </div>
     </div>
 
-    <!-- Main jumbotron for a primary marketing message or call to action -->
-    <div class="jumbotron">
+    <div class="jumbotron" style="padding: 10px 0px 10px 0px;">
       <div class="container">
-        <h1>Herzlich Willkommen</h1>
-		<h2>im Administrationsbereich vom Virtuellen Campus Lingen</h2>
-        <p>Hier finden Sie alle Einstellm&ouml;glichkeiten zur Administration des Virtuellen Rundgangs.</p>
+		<h2>Email des Administrators ändern - zurzeit "MAIL"</h2>
       </div>
     </div>
 
     <div class="container">
-      <!-- Example row of columns -->
-      <div class="row">
-        <div class="col-lg-4">
-          <h2>Infotexte</h2>
-          <p>Hier haben Sie die Möglichkeit Infotexte innerhalb der 360-Grad Bilder anzulegen.</p>
-          <p><a class="btn btn-default" href="edit_infotext.php">Infotexte bearbeiten &raquo;</a></p>
-       </div>
-        <div class="col-lg-4">
-          <h2>Fotos</h2>
-          <p>Hier haben Sie die Möglichkeit die 360-Grad Bilder anzulegen und zuverwalten.</p>
-          <p><a class="btn btn-default" href="edit_picture.php">Fotos bearbeiten &raquo;</a></p>
-        </div>
-		<div class="col-lg-4">
-          <h2>Übersichtskarte</h2>
-          <p>Hier haben Sie die Möglichkeit die 360-Grad Bilder auf der Übersichtskarte zu positionieren</p>
-          <p><a class="btn btn-default" href="edit_map.php">Übersichtskarte bearbeiten &raquo;</a></p>
-        </div>
-      </div>
+		<div>
+		
+		<form class="navbar-form pull-left">  
+		  <b>Neues Email:</b><br/>
+		  <input type="text" class="" placeholder="Email...">
+		  <br/>
+		  <br/>
+		  <b>Neues Email bestätigen:</b><br/>  
+		  <input type="text" class="" placeholder="Email...">
+		  <br/>  
+		  <br/>
+		  <button type="submit" class="btn">Ändern</button>  
+		</form>
+		<br style="clear:both;"/>
+		</div>
 
       <hr>
 
