@@ -5,19 +5,10 @@
  */
 $DOCUMENT_ROOT = dirname(__FILE__);
 
-// Zugangsdaten für MySQL
-$MYSQL_host = 'localhost';
-$MYSQL_user = '...';
-$MYSQL_passw = '...';
-$db = '...';
-
-/**
- * Datenbankverbindung herstellen
- */
 $tools_dir = $DOCUMENT_ROOT . "/tools/";
 include_once($tools_dir . "connect.php");
 include_once($tools_dir . "sql.php");
-$dblk = connect($MYSQL_host, $MYSQL_user, $MYSQL_passw, $db);
+$dblk = connect();
 
 $error = 0;
 
@@ -58,17 +49,17 @@ printf($error);
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
 
-        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="assets/css/bootstrap.min.css">
         <style>
             body {
                 padding-top: 50px;
                 padding-bottom: 20px;
             }
         </style>
-        <link rel="stylesheet" href="css/bootstrap-theme.min.css">
-        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="assets/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="assets/css/main.css">
 
-        <script src="js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+        <script src="assets/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
     </head>
     <body>
         <!--[if lt IE 7]>
@@ -133,11 +124,11 @@ printf($error);
       </footer>
     </div> <!-- /container -->        
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
+        <script>window.jQuery || document.write('<script src="assets/js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
 
-        <script src="js/vendor/bootstrap.min.js"></script>
+        <script src="assets/js/vendor/bootstrap.min.js"></script>
 
-        <script src="js/main.js"></script>
+        <script src="assets/js/main.js"></script>
 
         <script>
             var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
