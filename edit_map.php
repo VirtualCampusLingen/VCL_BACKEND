@@ -93,8 +93,8 @@ error_reporting(null);
       
 
       <ul id="map_tabs" class="nav nav-tabs">
-        <li><a href="#Halle 1/2" data-href="/edit_map.php?map_id=1" data-toggle="tab">Halle 1/2</a></li>
-        <li><a href="#KE" data-href="/edit_map.php?map_id=2" data-toggle="tab">KE</a></li>
+        <li><a href="#Halle 1/2" data-href="edit_map.php?map_id=1" data-toggle="tab">Halle 1/2</a></li>
+        <li><a href="#KE" data-href="edit_map.php?map_id=2" data-toggle="tab">KE</a></li>
       </ul>
 
 
@@ -120,12 +120,16 @@ error_reporting(null);
         $sql_photos = sql("SELECT * FROM photo");
         $sql_map_photos = sql("SELECT * FROM photo WHERE map_id='" .$mapId. "'");
         $sql_map_path = sql("SELECT path FROM map WHERE ID='" .$mapId. "'");
-        $sql_map_path = mysql_fetch_assoc($sql_map_path)['path'];
 
-        $hsh = [];
+        $path = mysql_fetch_array($sql_map_path);
+        if(!empty($path["path"])){
+          $sql_map_path = $path["path"];
+        }else {
+          $sql_map_path = "";
+        }
+
         $i = 0;
         while($row = mysql_fetch_assoc($sql_map_photos)){
-          $hsh[$i] = [];
           $hsh[$i]["ID"] = $row["ID"];
           $hsh[$i]["photo_name"] = $row["photo_name"];
           $hsh[$i]["description"] = $row["description"];
@@ -155,7 +159,7 @@ error_reporting(null);
         $(window).load(function(){
           $("#photo_pick").selectpicker();
           $('#map_tabs a').each(function(){
-            if (location.pathname + location.search == $(this).attr("data-href") ) {
+            if ("edit_map.php"+location.search == $(this).attr("data-href") ) {
               $(this).parent("li").addClass("active")
             }
             $(this).click(function(){
@@ -204,7 +208,6 @@ error_reporting(null);
         <form id="edit_map_form" method="POST">
           <?php
             echo("<select name='ID' id='photo_pick' class='selectpicker'>");
-            $photo_hsh = [];
             $n = 0;
             while($row = mysql_fetch_assoc($sql_photos)){
               $photo_hsh[$n]["ID"] = $row["ID"]; 

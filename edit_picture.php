@@ -9,8 +9,14 @@
         <title></title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
-
+        <link rel="stylesheet" href="assets/css/bootstrap.min.css">
         <link rel="stylesheet" href="assets/css/bootstrap-theme.min.css">
+        <style>
+            body {
+                padding-top: 50px;
+                padding-bottom: 20px;
+            }
+        </style>
         <link rel="stylesheet" href="assets/css/main.css">
 
         <script src="assets/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
@@ -56,7 +62,7 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron" style="padding: 10px 0px 10px 0px;">
       <div class="container">
-		<h2>Hochladen & Verwalten von Fotos</h2>
+		  <h2>Hochladen & Verwalten von Fotos</h2>
       </div>
     </div>
 
