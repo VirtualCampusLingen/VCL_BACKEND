@@ -8,3 +8,8 @@
   cursor: pointer;
   background-color: black;
 }
+
+#edit_map_content {
+  position: absolute;
+  top: 205px;
+}

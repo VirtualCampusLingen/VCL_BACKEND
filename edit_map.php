@@ -7,6 +7,7 @@ include_once($tools_dir . "sql.php");
 $dblk = connect();
 
 $error = 0;
+error_reporting(null);
 
 ?>
 
@@ -62,7 +63,13 @@ $error = 0;
       </li>
             <li><a href="edit_infotext.php">Infotexte</a></li>
       <li><a href="edit_picture.php">Fotos</a></li>
-      <li class="active"><a href="edit_map.php">Übersichtskarte</a></li>
+      <li class="dropdown">
+        <a href="edit_admin.php" class="dropdown-toggle" data-toggle="dropdown">Übersichtskarten <b class="caret"></b></a>
+         <ul class="dropdown-menu">
+          <li><a href="edit_map.php?map_id=1">Halle 1/2</a></li>
+          <li><a href="edit_map.php?map_id=2">KE</a></li>
+              </ul> 
+      </li>
           </ul>
         </div><!--/.navbar-collapse -->
       </div>
@@ -75,7 +82,9 @@ $error = 0;
       </div>
     </div>
 
+
     <div class="container">
+      
       <!-- Example row of columns -->
       <script src="assets/js/vendor/jquery-1.10.1.min.js"></script>
       <script src="assets/js/main.js"></script>
@@ -83,9 +92,17 @@ $error = 0;
       <script src="assets/js/bootstrap-select.min.js"></script>
       
 
+      <ul id="map_tabs" class="nav nav-tabs">
+        <li><a href="#Halle 1/2" data-href="/edit_map.php?map_id=1" data-toggle="tab">Halle 1/2</a></li>
+        <li><a href="#KE" data-href="/edit_map.php?map_id=2" data-toggle="tab">KE</a></li>
+      </ul>
+
+
       <?php 
         //Read GET Data
-        $mapId = $_GET['map_id'] || 1;
+        $mapId = $_GET['map_id'];
+        if(empty($mapId)) $mapId = 1;
+
         //Read transmitted POST Data
         $id = $_POST['ID'];
         $xPos = $_POST['x_position'];
@@ -100,11 +117,14 @@ $error = 0;
       ?>
 
       <?php
-        $sql_photo = sql("SELECT * FROM photo WHERE map_id='" .$mapId. "'");
+        $sql_photos = sql("SELECT * FROM photo");
+        $sql_map_photos = sql("SELECT * FROM photo WHERE map_id='" .$mapId. "'");
         $sql_map_path = sql("SELECT path FROM map WHERE ID='" .$mapId. "'");
+        $sql_map_path = mysql_fetch_assoc($sql_map_path)['path'];
+
         $hsh = [];
         $i = 0;
-        while($row = mysql_fetch_assoc($sql_photo)){
+        while($row = mysql_fetch_assoc($sql_map_photos)){
           $hsh[$i] = [];
           $hsh[$i]["ID"] = $row["ID"];
           $hsh[$i]["photo_name"] = $row["photo_name"];
@@ -114,7 +134,9 @@ $error = 0;
           $hsh[$i]["map_id"] = $row["map_id"];
 
           if($hsh[$i]["x_position"] && $hsh[$i]["y_position"]){
-            echo("<img id='dot0' 
+            echo("
+              <a onclick='$(this).popover()'>
+              <img id='dot0' 
               class='map_dots' 
               src='assets/img/dot.png' 
               data-x-pos='" . $hsh[$i]["x_position"] . "' 
@@ -122,8 +144,8 @@ $error = 0;
               data-original-title=''
               title = '" . $hsh[$i]["photo_name"] . "'
               data-content= '" . $hsh[$i]["description"] . "'
-              <a onclick='$(this).popover()'></a>
-              />");
+              />
+              </a>  ");
           }
           $i++;
         }
@@ -132,11 +154,23 @@ $error = 0;
       <script>        
         $(window).load(function(){
           $("#photo_pick").selectpicker();
+          $('#map_tabs a').each(function(){
+            if (location.pathname + location.search == $(this).attr("data-href") ) {
+              $(this).parent("li").addClass("active")
+            }
+            $(this).click(function(){
+              location.href = $(this).attr("data-href");
+            });
+          });
 
-          imgOffset = $("#uebersichts_map").offset();
-          $("#uebersichts_map_area").click(function(e){
-            $("#uebersichts_map_X").val(e.pageX-imgOffset.left);
-            $("#uebersichts_map_Y").val(e.pageY-imgOffset.top);
+          if(!$("#edit_map_map").attr("src")){
+            $("#edit_map_form").hide();
+          }
+
+          imgOffset = $("#edit_map_map").offset();
+          $(".map_area").click(function(e){
+            $("#edit_map_form_X").val(e.pageX-imgOffset.left);
+            $("#edit_map_form_Y").val(e.pageY-imgOffset.top);
           });
 
           $(".map_dots").each(function(){
@@ -150,39 +184,51 @@ $error = 0;
         });
       </script> 
 
+      <div id="edit_map_content">
+        <map name="map" id="map">
+        <area id="1" class="map_area" 
+          shape="poly" 
+          coords="2,103,3,103,181,103,181,3,197,3,197,104,502,103,502,2,516,2,517,104,883,104,883,118,707,119,707,249,692,249,692,118,517,118,517,249,502,248,502,118,197,119,197,248,181,248,181,118,2,118,2,102" 
+          href="#" 
+          alt="" />
 
-      <map name="map" id="map">
-      <area id="uebersichts_map_area" 
+        <area id="2" 
         shape="poly" 
-        coords="2,103,3,103,181,103,181,3,197,3,197,104,502,103,502,2,516,2,517,104,883,104,883,118,707,119,707,249,692,249,692,118,517,118,517,249,502,248,502,118,197,119,197,248,181,248,181,118,2,118,2,102" 
-        href="#" 
+        coords="9,64,10,64,61,64,61,72,83,72,83,64,161,64,161,6,8,6,8,65" 
+        href="edit_map.php?map_id=2" 
         alt="" />
-
-      <area shape="poly" coords="9,64,10,64,61,64,61,72,83,72,83,64,161,64,161,6,8,6,8,65" href="#" alt="" />
-      </map>
-      <script>console.log("<?= $sql_map_path ?>")</script>
-      <img src="assets/img/uebersichtskarte.jpg"  border="0" alt="Übersichtskarte" title="" usemap="#map" id="uebersichts_map" style="position: absolute; top:150px; left:100px" />
+        </map>
+        <img src="<?= $sql_map_path ?>"  border="0" alt="Übersichtskarte" title="" usemap="#map" id="edit_map_map"/>
 
 
-      <form method="POST" style="position: absolute; top:410px; left:100px">
-        <?php
-          echo("<select name='ID' id='photo_pick' class='selectpicker'>");
-          foreach ($hsh as $key => $value) {
-            $key += 1;
-            echo("<option value='" .$key. "'>" .$value["photo_name"]. "</option>");
-          };
-          echo("</select>");
-        ?>
+        <form id="edit_map_form" method="POST">
+          <?php
+            echo("<select name='ID' id='photo_pick' class='selectpicker'>");
+            $photo_hsh = [];
+            $n = 0;
+            while($row = mysql_fetch_assoc($sql_photos)){
+              $photo_hsh[$n]["ID"] = $row["ID"]; 
+              $photo_hsh[$n]["photo_name"] = $row["photo_name"];
+              $n++;  
+            }
 
-        <input type="text" name="x_position" id="uebersichts_map_X" placeholder="X Position">
-        <input type="text" name="y_position" id="uebersichts_map_Y" placeholder="Y Position">
-        <button type="submit" class="btn btn-success">Speichern</button>
-      </form>
-      <hr>
+            foreach ($photo_hsh as $key => $value) {
+              $key += 1;
+              echo("<option value='" .$key. "'>" .$value["photo_name"]. "</option>");
+            };
+            echo("</select>");
+          ?>
 
-      <footer>
-        <p>&copy; VCL 2013</p>
-      </footer>
+          <input type="text" name="x_position" id="edit_map_form_X" placeholder="X Position">
+          <input type="text" name="y_position" id="edit_map_form_Y" placeholder="Y Position">
+          <button type="submit" class="btn btn-success">Speichern</button>
+        </form>
+        <hr>
+
+        <footer>
+          <p>&copy; VCL 2013</p>
+        </footer>
+      </div> <!-- /edit_map_content  -->
     </div> <!-- /container -->        
     <!-- 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
