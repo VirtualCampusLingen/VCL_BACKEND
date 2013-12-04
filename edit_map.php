@@ -41,6 +41,11 @@ error_reporting(null);
         <!--[if lt IE 7]>
             <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
         <![endif]-->
+    <div class='flash'>
+      <button type='button' class='close' data-dismiss='alert'>&times;</button>
+      <div class='flash_msg'></div>
+    </div>
+
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
@@ -78,7 +83,7 @@ error_reporting(null);
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron" style="padding: 10px 0px 10px 0px;">
       <div class="container">
-    <h2>Platziere ein neues Bild auf der Übersichtskarte</h2>
+        <h2>Platziere ein neues Bild auf der Übersichtskarte</h2>
       </div>
     </div>
 
@@ -93,9 +98,21 @@ error_reporting(null);
       
 
       <ul id="map_tabs" class="nav nav-tabs">
-        <li><a href="#Halle 1/2" data-href="edit_map.php?map_id=1" data-toggle="tab">Halle 1/2</a></li>
-        <li><a href="#KE" data-href="edit_map.php?map_id=2" data-toggle="tab">KE</a></li>
+        <li><a href="#Halle1_2" data-map-id="1" data-href="edit_map.php?map_id=1" data-toggle="tab">Halle 1/2</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-no-action="true" data-toggle="dropdown">KE Gebäude<b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a href="#KEEG" data-map-id="2" data-href="edit_map.php?map_id=2" data-toggle="tab">KE EG</a></li>
+            <li><a href="#KE1OG" data-map-id="3" data-href="edit_map.php?map_id=3" data-toggle="tab">KE 1OG</a></li>
+          </ul>
+        </li>
+
+        <div id="edit_map_ctrl_btnGrp"> 
+          <button class="btn btn-danger" onclick="exitEditMode()">Bearbeitungsmodus verlassen</button>
+          <button class="btn btn-success" onclick="neighboursSendAjax()">Speichern</button>
+        </div>
       </ul>
+
 
 
       <?php 
@@ -104,66 +121,100 @@ error_reporting(null);
         if(empty($mapId)) $mapId = 1;
 
         //Read transmitted POST Data
+        $entering_map_id = $_POST['entering_point'];
         $id = $_POST['ID'];
         $xPos = $_POST['x_position'];
         $yPos = $_POST['y_position'];
-        if(!empty($xPos)){
+        $map_id = $_POST['map_id'];
+
+        //If 'is_entering_point' is set, change map Table
+        if( !empty($entering_map_id) ) {
+          sql("UPDATE map_enterings SET entered_photo_id='".$id."', x_pos_on_map='".$xPos."', y_pos_on_map='".$yPos."' WHERE map_id='".$mapId."' AND entered_map_id='".$entering_map_id."' ");
+        }
+        //else change photo table
+        elseif ( !empty($xPos) && !empty($yPos) && !empty($id) ) {
           sql("UPDATE photo SET 
-            map_id = '1',
+            map_id = '".$map_id."',
             x_position='" .$xPos. "', 
             y_position='" .$yPos. "' 
-            WHERE ID='" .$id. "' ");
+            WHERE PhotoID='" .$id. "' ");
         }
+
       ?>
 
       <?php
         $sql_photos = sql("SELECT * FROM photo");
         $sql_map_photos = sql("SELECT * FROM photo WHERE map_id='" .$mapId. "'");
-        $sql_map_path = sql("SELECT path FROM map WHERE ID='" .$mapId. "'");
+        $sql_sub_map_photos = sql("SELECT * FROM map ");
+        //TODO select all From map Table
+        $sql_map = sql("SELECT map.*, map_enterings.* From map INNER JOIN map_enterings ON map.MapID = map_enterings.map_id WHERE map.MapID='".$mapId."' ");
 
-        $path = mysql_fetch_array($sql_map_path);
-        if(!empty($path["path"])){
-          $sql_map_path = $path["path"];
-        }else {
-          $sql_map_path = "";
-        }
+        while($row = mysql_fetch_assoc($sql_map)){
+          if($row["MapID"] == $mapId){
+            $map["MapID"] = $mapId;
+            $map["map_name"] = $row["map_name"];
+            $map["image_map_path"] = $row["image_map_path"];
+            $map["image_map_entrys"] = $row["image_map_entrys"];
+            $map["parent_map"] = $row["parent_map"];
+            $map["map_starting_photo"] = $row["map_starting_photo"];
 
-        $i = 0;
+            if(!empty($row["path"])) $map["path"] = $row["path"];
+            else $map["path"] = "";
+          }
+          
+          $entered_photo_map_name = sql("SELECT map_name FROM map WHERE MapID='".$row['entered_map_id']."' ");
+          $entered_photo_map_name = mysql_result($entered_photo_map_name, 0);
+          echo("
+            <a class='aPop' data-id='".$row["entered_photo_id"]."'>
+            <img id='dot".$row["entered_photo_id"]."' 
+            class='map_dots' 
+            src='assets/img/dot_orange.png' 
+            data-origin-color='orange'
+            data-map-id='".$row["entered_map_id"]."'
+            data-entering-to='".$entered_photo_map_name."'
+            data-id='".$row["entered_photo_id"]."'
+            data-x-pos='" . $row["x_pos_on_map"] . "' 
+            data-y-pos='".$row["y_pos_on_map"]."'
+            data-content= 'Test'
+            />
+            </a>  ");
+        };
+
         while($row = mysql_fetch_assoc($sql_map_photos)){
-          $hsh[$i]["ID"] = $row["ID"];
-          $hsh[$i]["photo_name"] = $row["photo_name"];
-          $hsh[$i]["description"] = $row["description"];
-          $hsh[$i]["x_position"] = $row["x_position"];
-          $hsh[$i]["y_position"] = $row["y_position"];
-          $hsh[$i]["map_id"] = $row["map_id"];
+          $index = $row["PhotoID"];
+          $hsh[$index]["PhotoID"] = $row["PhotoID"];
+          $hsh[$index]["photo_name"] = $row["photo_name"];
+          $hsh[$index]["description"] = $row["description"];
+          $hsh[$index]["x_position"] = $row["x_position"];
+          $hsh[$index]["y_position"] = $row["y_position"];
+          $hsh[$index]["map_id"] = $row["map_id"];
 
-          if($hsh[$i]["x_position"] && $hsh[$i]["y_position"]){
+          if($hsh[$index]["x_position"] && $hsh[$index]["y_position"]){
             echo("
-              <a onclick='$(this).popover()'>
-              <img id='dot0' 
+              <a class='aPop' data-id='".$hsh[$index]["PhotoID"]."'>
+              <img id='dot".$hsh[$index]["PhotoID"]."' 
               class='map_dots' 
-              src='assets/img/dot.png' 
-              data-x-pos='" . $hsh[$i]["x_position"] . "' 
-              data-y-pos='".$hsh[$i]["y_position"]."'
-              data-original-title=''
-              title = '" . $hsh[$i]["photo_name"] . "'
-              data-content= '" . $hsh[$i]["description"] . "'
+              src='assets/img/dot_blue.png'
+              data-origin-color='blue'
+              data-id='".$hsh[$index]["PhotoID"]."'
+              data-x-pos='" . $hsh[$index]["x_position"] . "' 
+              data-y-pos='".$hsh[$index]["y_position"]."'
+              data-content= '" . $hsh[$index]["description"] . "'
               />
               </a>  ");
           }
-          $i++;
         }
       ?>
 
       <script>        
         $(window).load(function(){
           $("#photo_pick").selectpicker();
-          $('#map_tabs a').each(function(){
+          $("#map_tabs a[data-no-action!='true']").each(function(){
             if ("edit_map.php"+location.search == $(this).attr("data-href") ) {
               $(this).parent("li").addClass("active")
             }
             $(this).click(function(){
-              location.href = $(this).attr("data-href");
+              location.href = $(this).attr("data-href"); 
             });
           });
 
@@ -178,7 +229,23 @@ error_reporting(null);
           });
 
           $(".map_dots").each(function(){
-            $(this).popover();
+            $(this).click(function(){
+              if(typeof editModeState != 'undefined' && editModeState){
+                //prevent popover
+                $(this).popover('disable');
+                //edit JSon
+                var neighbour_id = $(this).attr("data-id")
+                toggleNeighbourJson(neighbour_id)
+                //toggle Img color
+                toggleImgColor(this);
+              }
+            });
+            //TODO read correct photo name with id of $(this).attr('data-id')
+            if(!$(this).attr("data-entering-to"))
+              $(this).popover({
+                html: true,
+                title: "<?= $hsh[1]['photo_name'] ?> <a onclick='editMode(this)'>bearbeiten</a>"
+              });
 
             var map_dot = $(this);
             var offsetTop = imgOffset.top + parseInt(map_dot.attr("data-y-pos")) - map_dot.height()/2;
@@ -186,41 +253,150 @@ error_reporting(null);
             $(this).attr("style", "z-index: 2; position: absolute; top: "+offsetTop+"px; left: "+offsetLeft+"px;");
           });
         });
+
+        function editMode(popover_link){
+          editModeState = true
+          var clickedPhotoID = $(popover_link).closest(".aPop").attr("data-id")
+          //reset all previos img colors
+          $("img[src='assets/img/dot_green.png']").each(function(){toggleImgColor(this)})
+          //show control button group
+          $("#map_tabs li[class!='active']").hide()
+          $("#edit_map_ctrl_btnGrp").show();
+          //highlight curren img
+          $("#dot"+clickedPhotoID).addClass("edit_current_img")
+          //get all  neighbours form DB as Json
+          $.getJSON("/admin/test_new.php?id="+clickedPhotoID, function(data){
+            var existingNeighbours = data["Panoid"].neighbours;
+            console.log(existingNeighbours)
+            //generate Json
+            neighbourJson = new Object();
+            neighbourJson.photo_id = clickedPhotoID;
+            neighbourJson.neighbours = [];
+            for(var index in existingNeighbours){
+              var neighbour_id = existingNeighbours[index].neighbour_id
+              neighbourJson.neighbours[index] = neighbour_id
+
+              //$("#sub_map_container button[data-entry-photo='"+neighbour_id+"']").attr("class", "btn btn-success")
+              toggleImgColor( $("#dot"+neighbour_id) )
+            };
+            //show SubMap Panel
+            //$("#sub_map_container").show()
+            //hide popover
+            $(".popover:visible").hide()
+          });
+          
+        };
+
+        function toggleImgColor(img){ 
+          $(img).attr("src").indexOf($(img).attr("data-origin-color")) >= 0 ?  $(img).attr("src", "assets/img/dot_green.png") : $(img).attr("src", "assets/img/dot_"+$(img).attr("data-origin-color")+".png") 
+        }
+
+        function exitEditMode(){
+          //hide control button group
+          $("#edit_map_ctrl_btnGrp").hide()
+          $("#map_tabs li[class!='active']").show()
+          editModeState = false;
+          //reset all previous img colors
+          $("img[src='assets/img/dot_green.png']").each(function(){toggleImgColor(this)})
+          //remove Highlight class
+          $(".edit_current_img").removeClass("edit_current_img")
+          //$("#sub_map_container button").attr("class", "btn btn-info")
+          //$("#sub_map_container").hide()
+          //delete Json Object
+          delete neighbourJson
+          //active popover functionality
+          $(".map_dots").popover('enable')
+        }
+
+        function subMapToggle(subMapToggleBtn){
+          var id = $(subMapToggleBtn).attr('data-entry-photo')
+          toggleNeighbourJson(id)
+          
+          new_class = neighbourJson.neighbours.indexOf(id) > -1 ? "btn btn-success" : "btn btn-info"
+          $(subMapToggleBtn).removeClass()
+          $(subMapToggleBtn).addClass(new_class)
+        }
+
+        function toggleNeighbourJson(id){
+          var neighbours_array = neighbourJson.neighbours;
+          if ( neighbours_array.indexOf(id) > -1){
+            neighbours_array.splice(neighbours_array.indexOf(id), 1)
+          }else neighbours_array.push(id)
+        }
+
+        function neighboursSendAjax(){
+          //request to Server
+          var jqueryXHR = $.ajax({
+            type: "GET",
+            url: "/admin/test_new.php",
+            data: neighbourJson,
+            error: function(xhr, status, error) {
+              setFlash('error', 'Ihre Anfrage konnte nicht abgesendet werden')
+            },
+            success: function(data, status, xhr) {
+              setFlash('success', 'Daten wurden gespeichert')
+            },
+            complete: function(data, status) {
+              exitEditMode()
+            }
+          });
+        }
+
+        function setFlash(type, msg){
+          switch (type){
+            case 'success':
+              $(".flash").addClass("flash_success")
+              $(".flash_msg").html(msg)
+              $(".flash").show()
+              break;
+            case 'error':
+              $(".flash").addClass("flash_error")
+              $(".flash_msg").html(msg)
+              $(".flash").show()
+              break;
+          }
+        }
       </script> 
 
       <div id="edit_map_content">
         <map name="map" id="map">
         <area id="1" class="map_area" 
-          shape="poly" 
-          coords="2,103,3,103,181,103,181,3,197,3,197,104,502,103,502,2,516,2,517,104,883,104,883,118,707,119,707,249,692,249,692,118,517,118,517,249,502,248,502,118,197,119,197,248,181,248,181,118,2,118,2,102" 
+          shape="poly"
+          coords= "<?= $map["image_map_path"] ?>"
           href="#" 
           alt="" />
 
         <area id="2" 
         shape="poly" 
-        coords="9,64,10,64,61,64,61,72,83,72,83,64,161,64,161,6,8,6,8,65" 
+        coords= "<?= $map["image_map_entrys"] ?>"
         href="edit_map.php?map_id=2" 
         alt="" />
         </map>
-        <img src="<?= $sql_map_path ?>"  border="0" alt="Übersichtskarte" title="" usemap="#map" id="edit_map_map"/>
-
+        <img src="<?= $map['path'] ?>"  border="0" alt="Übersichtskarte" title="" usemap="#map" id="edit_map_map"/>
 
         <form id="edit_map_form" method="POST">
           <?php
             echo("<select name='ID' id='photo_pick' class='selectpicker'>");
             $n = 0;
             while($row = mysql_fetch_assoc($sql_photos)){
-              $photo_hsh[$n]["ID"] = $row["ID"]; 
+              $photo_hsh[$n]["PhotoID"] = $row["PhotoID"]; 
               $photo_hsh[$n]["photo_name"] = $row["photo_name"];
+              
+              echo("<option value='" .$photo_hsh[$n]["PhotoID"]. "'>" .$photo_hsh[$n]["photo_name"]. "</option>");
               $n++;  
             }
-
-            foreach ($photo_hsh as $key => $value) {
-              $key += 1;
-              echo("<option value='" .$key. "'>" .$value["photo_name"]. "</option>");
-            };
             echo("</select>");
           ?>
+          <input type="hidden" name="map_id" id="edit_map_form_map_id" value="<?=$mapId?>">
+          <span id='realted_maps_radio_bar'>
+          </span>
+          <script>
+            $(".map_dots[data-entering-to]").each(function(){
+              var val = $(this).attr('data-map-id')
+              var content = $(this).attr('data-entering-to')
+              $('#realted_maps_radio_bar').append("<input type='radio' name='entering_point' value='"+val+"'>"+content+" ");
+            });
+          </script>
 
           <input type="text" name="x_position" id="edit_map_form_X" placeholder="X Position">
           <input type="text" name="y_position" id="edit_map_form_Y" placeholder="Y Position">

@@ -10,30 +10,40 @@ include_once($tools_dir . "connect.php");
 include_once($tools_dir . "sql.php");
 $dblk = connect();
 
-$error = 0;
+  if(isset($_GET['ok'])){
+    //Beide eingaben gesetzt
+    if((isset($_GET['mail_1']) && isset($_GET['mail_2'])) && ("" != $_GET['mail_1'] && "" != $_GET['mail_2'])){
 
-if(!empty($_POST['mail_1']) && !empty($_POST['mail_2'])){
-	//Mail gleich
-	if($_POST['mail_1']==$_POST['mail_2']){
-		//Update in der Datenbank
-		sql("UPDATE `admin` SET `E_MAIL` = '". mysql_real_escape_string($_POST['mail_1'])."' WHERE `AdminID` = 1");
-		$mail_admin = $_POST['mail_1'];
-	}
-	else{
-		$error = 1;
-	}
-}
-elseif((empty($_POST['mail_1'])||empty($_POST['mail_2']))|| $error = 1){
+      $mail1 = mysql_real_escape_string($_GET['mail_1']);
+      $mail2 = mysql_real_escape_string($_GET['mail_2']);
+      
+      //Sind die Eingaben gleich ?
+      if($mail1 == $mail2){
+          $ok = sql("UPDATE  `admin` SET  `E_Mail` =  '".$mail1."' WHERE  `AdminID` =1");
+          if($ok)
+          {
+            $success = "Email wurde erfolgreich geändert";
+            $mail_admin = $mail1;
+          }
+      }
+      else {
+        $error = "Email stimmen nicht überein!";
+      }
 
-/**
- * Email vom Admin
- */
-$result = sql("SELECT `E_Mail` FROM `admin`");
-$mail_admin = mysql_fetch_assoc($result);
-$mail_admin = $mail_admin['E_Mail'];
+    }
+    else {
+      $error = "Es wurden keine Werte für die Email angegeben!";
+    }
 
-}
-printf($error);
+  }
+  
+  if(!isset($mail_admin)){
+    $result = sql("SELECT `E_Mail` FROM `admin` WHERE `AdminID` = 1");
+    while ($row = mysql_fetch_assoc($result)) {
+        $mail_admin = $row['E_Mail'];
+    }
+  }
+
 
 ?>
 
@@ -73,7 +83,7 @@ printf($error);
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="index.html">VCL</a>
+ <a class="navbar-brand" href="index.html"><img src="assets/img/Logo.png" width="37" height="20" alt="home"/></a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -101,15 +111,20 @@ printf($error);
 
     <div class="jumbotron" style="padding: 10px 0px 10px 0px;">
       <div class="container">
-		<h1 style="color:red;">Datenbankabfragen noch nicht ok</h1>
-		<h2>Email des Administrators ändern - zurzeit "<?=$mail_admin?>"</h2>
+		    <h2>Email des Administrators ändern - zurzeit "<?=$mail_admin?>"</h2>
       </div>
     </div>
 
     <div class="container">
-		<div>
+		    <?php if(isset($error)) {?>
+        <div style="border:1px solid Red;background-color: #ededed;padding:10px;"><h1><?=$error?><h1></div>
+        <?php } ?>
+        <?php if(isset($success)) {?>
+        <div style="border:1px solid Green;background-color: #ededed;padding:10px;"><h1><?=$success?><h1></div>
+        <?php } ?>
+    <div>
 		
-		<form class="navbar-form pull-left" method="POST">  
+		<form class="navbar-form pull-left">  
 		  <b>Neues Email:</b><br/>
 		  <input type="text" class="" name="mail_1" placeholder="Email...">
 		  <br/>
@@ -118,7 +133,7 @@ printf($error);
 		  <input type="text" class="" name="mail_2"placeholder="Email...">
 		  <br/>  
 		  <br/>
-		  <button type="submit" class="btn">Ändern</button>  
+		  <button type="submit" class="btn" name="ok" value="edit">Ändern</button>  
 		</form>
 		<br style="clear:both;"/>
 		</div>

@@ -1,3 +1,43 @@
+<?php
+
+/**
+ * Basisverzeichnis ohne abschliessendem Slash
+ */
+$DOCUMENT_ROOT = dirname(__FILE__);
+
+$tools_dir = $DOCUMENT_ROOT . "/tools/";
+include_once($tools_dir . "connect.php");
+include_once($tools_dir . "sql.php");
+$dblk = connect();
+
+  if(isset($_GET['ok'])){
+    //Beide eingaben gesetzt
+    if((isset($_GET['pw1']) && isset($_GET['pw2'])) && ("" != $_GET['pw1'] && "" != $_GET['pw2'])){
+      $pw1 = mysql_real_escape_string($_GET['pw1']);
+      $pw2 = mysql_real_escape_string($_GET['pw2']);
+      
+      //Sind die Eingaben gleich ?
+      if($pw1 == $pw2){
+          $ok = sql("UPDATE  `admin` SET  `Passwort` =  '".$pw1."' WHERE  `AdminID` =1");
+          if($ok)
+          {
+            $success = "Passwort wurde erfolgreich geändert";
+          }
+      }
+      else {
+        $error = "Passwörter stimmen nicht überein!";
+      }
+
+    }
+    else {
+      $error = "Es wurden keine Werte für das Passwort angegeben!";
+    }
+
+  }
+
+
+?>
+
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -34,21 +74,21 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="index.html">VCL</a>
+ <a class="navbar-brand" href="index.html"><img src="assets/img/Logo.png" width="37" height="20" alt="home"/></a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li><a href="index.html">Home</a></li>
-			<li class="active" class="dropdown">
-				<a href="edit_admin.php" class="dropdown-toggle" data-toggle="dropdown">Administration <b class="caret"></b></a>
-				 <ul class="dropdown-menu">
-					<li class="active"><a href="edit_admin_pw.php">Passwort ändern</a></li>
-					<li><a href="edit_admin_mail.php">Email ändern</a></li>
-              </ul>	
-			</li>
+      <li class="active" class="dropdown">
+        <a href="edit_admin.php" class="dropdown-toggle" data-toggle="dropdown">Administration <b class="caret"></b></a>
+         <ul class="dropdown-menu">
+          <li class="active"><a href="edit_admin_pw.php">Passwort ändern</a></li>
+          <li><a href="edit_admin_mail.php">Email ändern</a></li>
+              </ul> 
+      </li>
             <li><a href="edit_infotext.php">Infotexte</a></li>
-			<li><a href="edit_picture.php">Fotos</a></li>
-			<li class="dropdown">
+      <li><a href="edit_picture.php">Fotos</a></li>
+      <li class="dropdown">
         <a href="edit_admin.php" class="dropdown-toggle" data-toggle="dropdown">Übersichtskarten <b class="caret"></b></a>
          <ul class="dropdown-menu">
           <li><a href="edit_map.php?map_id=1">Halle 1/2</a></li>
@@ -63,34 +103,38 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron" style="padding: 10px 0px 10px 0px;">
       <div class="container">
-		<h2>Passwort ändern</h2>
+    <h2>Passwort ändern</h2>
       </div>
     </div>
 
     <div class="container">
-      
-
-		<div>
-		<form class="navbar-form pull-left">  
-		  <b>Neues Passwort:</b><br/>
-		  <input type="text" class="" placeholder="Passwort...">
-		  <br/>
-		  <br/>
-		  <b>Neues Passwort bestätigen:</b><br/>  
-		  <input type="text" class="" placeholder="Passwort...">
-		  <br/>  
-		  <br/>
-		  <button type="submit" class="btn">Ändern</button>  
-		</form>
-		<br style="clear:both;"/>
-		</div>
+        <?php if(isset($error)) {?>
+        <div style="border:1px solid Red;background-color: #ededed;padding:10px;"><h1><?=$error?><h1></div>
+        <?php } ?>
+        <?php if(isset($success)) {?>
+        <div style="border:1px solid Green;background-color: #ededed;padding:10px;"><h1><?=$success?><h1></div>
+        <?php } ?>
+    <div>
+    <form class="navbar-form pull-left">  
+      <b>Neues Passwort:</b><br/>
+      <input type="text" class="" name="pw1" placeholder="Passwort...">
+      <br/>
+      <br/>
+      <b>Neues Passwort bestätigen:</b><br/>  
+      <input type="text" class="" name="pw2" placeholder="Passwort...">
+      <br/>  
+      <br/>
+      <button type="submit" class="btn" name="ok" value="edit">Ändern</button>  
+    </form>
+    <br style="clear:both;"/>
+    </div>
       <hr>
 
       <footer>
         <p>&copy; VCL 2013</p>
       </footer>
     </div> <!-- /container -->        
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="assets/js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
 
         <script src="assets/js/vendor/bootstrap.min.js"></script>

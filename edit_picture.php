@@ -1,3 +1,43 @@
+<?php
+//Upload PHP
+
+$DOCUMENT_ROOT = dirname(__FILE__);
+
+$tools_dir = $DOCUMENT_ROOT . "/tools/";
+include_once($tools_dir . "connect.php");
+include_once($tools_dir . "sql.php");
+$dblk = connect();
+
+if(isset($_POST['Upload'])){
+
+  if ($_FILES['fileToUpload']['error'] > 0) {
+      echo "Error: " . $_FILES['fileToUpload']['error'] . "<br />";
+  } else {
+      // array of valid extensions
+      $validExtensions = array('.jpg', '.jpeg', '.gif', '.png');
+      // get extension of the uploaded file
+      $fileExtension = strrchr($_FILES['fileToUpload']['name'], ".");
+      // check if file Extension is on the list of allowed ones
+      if (in_array($fileExtension, $validExtensions)) {
+          // we are renaming the file so we can upload files with the same name
+          $newName = $_FILES['fileToUpload']['name'];
+          $destination = 'assets/img_360/' . $newName;
+          $description = mysql_real_escape_string($_POST['description']);
+	   $photo_name = mysql_real_escape_string($_POST['photo_name']);
+          if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], $destination)) {
+            chmod($destination,0644);
+              echo 'File ' .$newName. ' succesfully copied';
+
+              sql("INSERT INTO `db_vcl`.`photo` (`photo_name`, `description`, `path`, `uploaded_at`, `x_position`, `y_position`, `map_id`) 
+                   VALUES ('".$photo_name."', '".$description."', '".$destination."', '".date('Y-m-j')."', NULL, NULL, NULL)");
+          }
+      } else {
+          echo 'Bitte wählen Sie ein Bild! (.jpg, .jpeg, .gif, .png)';
+      }
+  }
+}
+
+?>
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -33,7 +73,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="index.html">VCL</a>
+ <a class="navbar-brand" href="index.html"><img src="assets/img/Logo.png" width="37" height="20" alt="home"/></a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -68,13 +108,17 @@
 
     <div class="container">
       
-        <form enctype="multipart/form-data" method="post" action="upload.php">
+        <form enctype="multipart/form-data" method="post">
           <div class="row">
-            <label for="fileToUpload">Select a File to Upload</label><br />
-            <input type="file" name="fileToUpload" id="fileToUpload" />
+            <label for="fileToUpload">File to Upload</label><br />
+            <input type="file" name="fileToUpload" id="fileToUpload" /><br/><br/>
+            <label for="description">Description</label><br/>
+            <input type="text" name="description" /><br/><br/>
+            <label for="photo_name">Photoname</label><br/>
+            <input type="text" name="photo_name" /><br/><br/>
           </div>
           <div class="row">
-            <input type="submit" value="Upload" />
+            <input type="submit" value="Upload" name="Upload"/>
           </div>
         </form>
 

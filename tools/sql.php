@@ -12,8 +12,8 @@ function sql($sql, $debug = false)
 	} else {
 		$res = mysql_query($sql);
 		if(is_null($res) || !$res) {
-			write_log(date("d.m.Y H:i:s")." - Statement fehlerhaft: ");
-			write_log(date("d.m.Y H:i:s")." - Stacktrace");
+			echo(date("d.m.Y H:i:s")." - Statement fehlerhaft: ");
+			echo(date("d.m.Y H:i:s")." - Stacktrace");
 			throw new Exception( mysql_error()."\n------------------------\n\n".$sql."\n");
 		}
 	}

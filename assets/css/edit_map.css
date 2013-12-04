@@ -13,3 +13,46 @@
   position: absolute;
   top: 205px;
 }
+
+#edit_map_ctrl_btnGrp {
+  display: none;
+}
+
+.edit_current_img {
+  border: 5px solid #449d44;
+}
+
+#sub_map_container {
+  display: none;
+  float: right;
+}
+
+.flash {
+  display: none;
+  position: fixed;
+  top: 60px;
+  right: 100px;
+  width: 200px;
+  text-align: center;
+  color: #086A87;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  border: 1px solid #fbeed5;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+  min-height: 70px;
+}
+
+.flash_success {
+  display: table;
+  background-color: #BCF5A9;
+}
+
+.flash_error {
+  display: table;
+  background-color: #F5BCA9;
+}
+
+.flash_msg {
+  display: table-cell;
+  vertical-align: middle;
+}
