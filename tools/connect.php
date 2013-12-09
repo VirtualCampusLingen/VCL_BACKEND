@@ -6,7 +6,7 @@
  */
 function connect()
 {
-	$linkid = mysql_pconnect('localhost', 'user_vcl', 'fvv!22wDcF') or die(mysql_error());
+	$linkid = mysql_pconnect('localhost', 'root', '') or die(mysql_error());
 	mysql_select_db('db_vcl') or die(mysql_error());
 
 	sql("SET NAMES 'utf8'");

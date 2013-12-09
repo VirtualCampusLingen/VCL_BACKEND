@@ -1,12 +1,14 @@
 <?php
 //Upload PHP
-
+//include necessary directorys
 $DOCUMENT_ROOT = dirname(__FILE__);
-
 $tools_dir = $DOCUMENT_ROOT . "/tools/";
 include_once($tools_dir . "connect.php");
 include_once($tools_dir . "sql.php");
 $dblk = connect();
+$error = 0;
+error_reporting(null);
+
 
 if(isset($_POST['Upload'])){
 
@@ -23,7 +25,7 @@ if(isset($_POST['Upload'])){
           $newName = $_FILES['fileToUpload']['name'];
           $destination = 'assets/img_360/' . $newName;
           $description = mysql_real_escape_string($_POST['description']);
-	   $photo_name = mysql_real_escape_string($_POST['photo_name']);
+          $photo_name = mysql_real_escape_string($_POST['photo_name']);
           if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], $destination)) {
             chmod($destination,0644);
               echo 'File ' .$newName. ' succesfully copied';
@@ -35,6 +37,15 @@ if(isset($_POST['Upload'])){
           echo 'Bitte wählen Sie ein Bild! (.jpg, .jpeg, .gif, .png)';
       }
   }
+}
+
+$photos = sql("SELECT * FROM photo");
+while($row = mysql_fetch_assoc($photos)){
+  $index = $row["PhotoID"];
+  $photo[$index]["PhotoID"] = $row["PhotoID"];
+  $photo[$index]["photo_name"] = $row["photo_name"];
+  $photo[$index]["description"] = $row["description"];
+  $photo[$index]["uploaded_at"] = $row["uploaded_at"];
 }
 
 ?>
@@ -73,18 +84,12 @@ if(isset($_POST['Upload'])){
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
- <a class="navbar-brand" href="index.html"><img src="assets/img/Logo.png" width="37" height="20" alt="home"/></a>
+          <a class="navbar-brand" href="index.html"><img src="assets/img/Logo.png" width="37" height="20" alt="home"/></a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li><a href="index.html">Home</a></li>
-			<li class="dropdown">
-				<a href="edit_admin.php" class="dropdown-toggle" data-toggle="dropdown">Administration <b class="caret"></b></a>
-				 <ul class="dropdown-menu">
-					<li><a href="edit_admin_pw.php">Passwort ändern</a></li>
-					<li><a href="edit_admin_mail.php">Email ändern</a></li>
-              </ul>	
-			</li>
+            <li><a href="edit_admin.php">Administration</a></li>
             <li><a href="edit_infotext.php">Infotexte</a></li>
 			<li class="active"><a href="edit_picture.php">Fotos</a></li>
 			<li class="dropdown">
@@ -98,7 +103,12 @@ if(isset($_POST['Upload'])){
         </div><!--/.navbar-collapse -->
       </div>
     </div>
-
+    <script>
+      function togglePictureThumb(span_thumb_id){
+        $("#picture_thumb_"+span_thumb_id).toggle()
+      };
+    </script>
+    
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron" style="padding: 10px 0px 10px 0px;">
       <div class="container">
@@ -106,8 +116,59 @@ if(isset($_POST['Upload'])){
       </div>
     </div>
 
+    <!-- List of Photos -->
     <div class="container">
-      
+      <section>
+      <h2>Liste der hochgeladenen Fotos || pro Seite?</h2>
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Bild</th>
+            <th>Name</th>
+            <th>Beschreibung</th>
+            <th>Hochgeladen am</th>
+            <th>Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php
+            foreach($photo as $key => $value){
+              echo("
+                <tr>
+                  <td>
+                    <button type='button' class='btn btn-info btn-xs' onclick='togglePictureThumb(".$key.")'>
+                      <span class='glyphicon glyphicon-picture'></span> anzeigen
+                    </button>
+                    <span id=picture_thumb_".$key." style='display: none'>
+                      <img src='http://vcl.connectiv.info/admin/assets/img_360/C_01.jpg' width='300px' alt='' class='img-thumbnail'>
+                    </span>
+                  </td>
+                  <td>".$value["photo_name"]."</td>
+                  <td>".$value["description"]."</td>
+                  <td>".$value["uploaded_at"]."</td>
+                  <td>
+                    <button class='btn btn-xs btn-primary' type='Button'>Bearbeiten</button>
+                  </td>
+                  <td>
+                  <button class='btn btn-xs btn-primary' type='Button'>anderes Foto</button>
+                  </td>
+                  <td>
+                  <button class='btn btn-xs btn-danger' type='Button'>Löschen</button>
+                  </td>
+                </tr>"
+                );
+            }
+            echo("<tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>");
+          ?>
+        </tbody>
+      </table>
+      </section>
+    </div class="container">
+    
+    <!-- Photo Upload -->
+    <div class="container">
+      <section>
+      <h2>Neues Foto Hochladen</h2>
         <form enctype="multipart/form-data" method="post">
           <div class="row">
             <label for="fileToUpload">File to Upload</label><br />
@@ -122,12 +183,13 @@ if(isset($_POST['Upload'])){
           </div>
         </form>
 
+        </section> 
+      
       <hr>
-
       <footer>
         <p>&copy; VCL 2013</p>
       </footer>
-    </div> <!-- /container -->        
+    </div> <!-- /container -->     
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="assets/js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
 
