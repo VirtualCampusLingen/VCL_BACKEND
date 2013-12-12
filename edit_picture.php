@@ -6,14 +6,13 @@ $tools_dir = $DOCUMENT_ROOT . "/tools/";
 include_once($tools_dir . "connect.php");
 include_once($tools_dir . "sql.php");
 $dblk = connect();
-$error = 0;
-error_reporting(null);
 
-
+//Photo Upload
 if(isset($_POST['Upload'])){
 
   if ($_FILES['fileToUpload']['error'] > 0) {
-      echo "Error: " . $_FILES['fileToUpload']['error'] . "<br />";
+      //echo "Error: " . $_FILES['fileToUpload']['error'] . "<br />";
+      $error = "Kein Foto ausgewählt";
   } else {
       // array of valid extensions
       $validExtensions = array('.jpg', '.jpeg', '.gif', '.png');
@@ -30,15 +29,34 @@ if(isset($_POST['Upload'])){
             chmod($destination,0644);
               echo 'File ' .$newName. ' succesfully copied';
 
-              sql("INSERT INTO `db_vcl`.`photo` (`photo_name`, `description`, `path`, `uploaded_at`, `x_position`, `y_position`, `map_id`) 
+              $res = sql("INSERT INTO `db_vcl`.`photo` (`photo_name`, `description`, `path`, `uploaded_at`, `x_position`, `y_position`, `map_id`) 
                    VALUES ('".$photo_name."', '".$description."', '".$destination."', '".date('Y-m-j')."', NULL, NULL, NULL)");
+            respondeToSql($res);
           }
       } else {
-          echo 'Bitte wählen Sie ein Bild! (.jpg, .jpeg, .gif, .png)';
+          //echo 'Bitte wählen Sie ein Bild! (.jpg, .jpeg, .gif, .png)';
+          $error = "Kein Foto ausgewählt";
       }
   }
 }
 
+//Update photo
+if(isset($_POST['update_photo_id'])){
+  $p_id = mysql_real_escape_string($_POST['update_photo_id']);
+  $p_name = mysql_real_escape_string($_POST['photo_name']);
+  $p_description = mysql_real_escape_string($_POST['photo_description']);
+  $res = sql("UPDATE photo SET photo_name='".$p_name."', description='".$p_description."' WHERE PhotoID='".$p_id."'");
+  respondeToSql($res);
+}
+
+//Delete Phototv
+if (isset($_POST['delete_photo'])){
+  $del_photo_id = mysql_real_escape_string($_POST['delete_photo']);
+  $res = sql("DELETE FROM photo WHERE PhotoID='".$del_photo_id."'");
+  respondeToSql($res);
+}
+
+//all photos
 $photos = sql("SELECT * FROM photo");
 while($row = mysql_fetch_assoc($photos)){
   $index = $row["PhotoID"];
@@ -46,6 +64,23 @@ while($row = mysql_fetch_assoc($photos)){
   $photo[$index]["photo_name"] = $row["photo_name"];
   $photo[$index]["description"] = $row["description"];
   $photo[$index]["uploaded_at"] = $row["uploaded_at"];
+}
+
+function respondeToSql($sql_statement){
+  if(!$sql_statement){
+    //internal server error
+    $error = "Ein Fehler ist aufgetreten";
+    http_response_code(500);
+  }else if(mysql_affected_rows() == 0){
+    //no row affected
+    $warning = "Keine Änderungen vorgenommen";
+    http_response_code(304);
+  }
+  else{  
+    //sql success
+    $success = "Erfolgreich";
+    http_response_code(200);
+  }
 }
 
 ?>
@@ -70,12 +105,19 @@ while($row = mysql_fetch_assoc($photos)){
         </style>
         <link rel="stylesheet" href="assets/css/main.css">
 
+        <script src="assets/js/vendor/jquery-1.10.1.min.js"></script>
         <script src="assets/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
     </head>
     <body>
         <!--[if lt IE 7]>
             <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
         <![endif]-->
+    <!-- FLASH MSG -->
+    <div class='flash'>
+      <button type='button' class='close' onclick="$('.flash').hide()">&times;</button>
+      <div class='flash_msg'></div>
+    </div>
+
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
@@ -104,9 +146,54 @@ while($row = mysql_fetch_assoc($photos)){
       </div>
     </div>
     <script>
+      //Main JS
       function togglePictureThumb(span_thumb_id){
         $("#picture_thumb_"+span_thumb_id).toggle()
       };
+      function toggleEditRow(photo_id){
+        $("#photo_row_edit_"+photo_id).toggle()
+        $("#photo_row_"+photo_id).toggle()
+      };
+      function deletePhoto(photo_id){
+        $.ajax({
+          type: "POST",
+          data: {'delete_photo': photo_id},
+          error: function(xhr, status, error) {
+            setFlash('error', 'Foto konnte nicht gelöscht werden')
+          },
+          success: function(data, status, xhr) {
+            setFlash('success', 'Foto wurde erfolgreich gelöscht')
+            $("#photo_row_"+photo_id).remove()
+          }
+        });
+      };
+
+      $(window).load(function(){
+        //Submit From per ajax, not needed anymore
+        /*$("form[data-remote='true']").submit(function(e) {
+          e.preventDefault()
+          var form = $(this)
+          data = form.serializeArray()
+          data.forEach(function(entry, index){
+            if(entry.value == ""){
+              form.context[index].value = form.context[index].placeholder
+            }  
+          });
+
+          $.ajax({
+            type: 'POST',
+            data: form.serialize(),
+            error: function(xhr, status, error) {
+              setFlash('error', 'Fotoinformationen konnte nicht aktualisiert werden')
+            },
+            success: function(data, status, xhr) {
+              if (status == 'notmodified') setFlash('notmodified', 'Keine Änderungen'); 
+              else setFlash('success', 'Foto wurde erfolgreich aktualisiert');
+              toggleEditRow()
+            }
+          });
+        });*/
+      });
     </script>
     
     <!-- Main jumbotron for a primary marketing message or call to action -->
@@ -116,6 +203,29 @@ while($row = mysql_fetch_assoc($photos)){
       </div>
     </div>
 
+    <!-- Upload Photo -->
+    <div class="container">
+      <section>
+        <h2>Neues Foto Hochladen</h2>
+          <form class="form-inline" role="form" enctype="multipart/form-data" method="post">
+            <div class="form-group">
+              <label class="sr-only" for="fileToUpload">File</label>
+              <input type="file" class="form-control" name="fileToUpload" id="fileToUpload">
+            </div>
+            <div class="form-group">
+              <label class="sr-only" for="description">Description</label>
+              <input class="form-control" id="description" name="description" placeholder="Beschreibung">
+            </div>
+            <div class="form-group">
+              <label class="sr-only" for="photo_name">Photoname</label>
+              <input class="form-control" id="photo_name" name="photo_name" placeholder="Fotoname">
+            </div>
+            <input type="submit" class="btn btn-success" value="Hochladen" name="Upload">
+          </form>
+      </section> 
+      
+    </div class="container">
+    
     <!-- List of Photos -->
     <div class="container">
       <section>
@@ -134,7 +244,7 @@ while($row = mysql_fetch_assoc($photos)){
           <?php
             foreach($photo as $key => $value){
               echo("
-                <tr>
+                <tr id='photo_row_".$key."'>
                   <td>
                     <button type='button' class='btn btn-info btn-xs' onclick='togglePictureThumb(".$key.")'>
                       <span class='glyphicon glyphicon-picture'></span> anzeigen
@@ -143,47 +253,32 @@ while($row = mysql_fetch_assoc($photos)){
                       <img src='http://vcl.connectiv.info/admin/assets/img_360/C_01.jpg' width='300px' alt='' class='img-thumbnail'>
                     </span>
                   </td>
-                  <td>".$value["photo_name"]."</td>
-                  <td>".$value["description"]."</td>
-                  <td>".$value["uploaded_at"]."</td>
+                  <td id='photo_name'>".htmlspecialchars($value["photo_name"])."</td>
+                  <td id='description'>".htmlspecialchars($value["description"])."</td>
+                  <td id='uploaded_at'>".htmlspecialchars($value["uploaded_at"])."</td>
                   <td>
-                    <button class='btn btn-xs btn-primary' type='Button'>Bearbeiten</button>
+                  <span class='glyphicon glyphicon-edit pointer' onclick='toggleEditRow(".$key.")'></span>
+                  ||
+                  <span class='glyphicon glyphicon-trash pointer' onclick='deletePhoto(".$key.")'></span>
                   </td>
-                  <td>
-                  <button class='btn btn-xs btn-primary' type='Button'>anderes Foto</button>
-                  </td>
-                  <td>
-                  <button class='btn btn-xs btn-danger' type='Button'>Löschen</button>
-                  </td>
+                </tr>
+                <tr id='photo_row_edit_".$key."' class='edit_row_toggle'>
+                  <form name='update_photo_row_".$key."' method='POST'>
+                    <input type='hidden' name='update_photo_id' value='".$key."'></input>
+                    <td><span>ändern</span></td>
+                    <td><input name='photo_name' value='".htmlspecialchars($value["photo_name"])."'></input></td>
+                    <td><input name='photo_description' value='".htmlspecialchars($value["description"])."'></input></td>
+                    <td><span>".htmlspecialchars($value["uploaded_at"])."</span></td>
+                    <td><button type='submit' class='btn-success btn btn-xs'>aktualisieren</button></td>
+                  </form>
                 </tr>"
                 );
             }
-            echo("<tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>");
+            echo("<tr><td colspan='12'>Alle weiteren Fotos anzeigen...</td></tr>");
           ?>
         </tbody>
       </table>
       </section>
-    </div class="container">
-    
-    <!-- Photo Upload -->
-    <div class="container">
-      <section>
-      <h2>Neues Foto Hochladen</h2>
-        <form enctype="multipart/form-data" method="post">
-          <div class="row">
-            <label for="fileToUpload">File to Upload</label><br />
-            <input type="file" name="fileToUpload" id="fileToUpload" /><br/><br/>
-            <label for="description">Description</label><br/>
-            <input type="text" name="description" /><br/><br/>
-            <label for="photo_name">Photoname</label><br/>
-            <input type="text" name="photo_name" /><br/><br/>
-          </div>
-          <div class="row">
-            <input type="submit" value="Upload" name="Upload"/>
-          </div>
-        </form>
-
-        </section> 
       
       <hr>
       <footer>
