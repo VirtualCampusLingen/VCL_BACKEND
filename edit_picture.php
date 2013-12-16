@@ -97,16 +97,16 @@ function respondeToSql($sql_statement){
         <meta name="viewport" content="width=device-width">
         <link rel="stylesheet" href="assets/css/bootstrap.min.css">
         <link rel="stylesheet" href="assets/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="assets/css/main.css">
+        <script src="assets/js/vendor/jquery-1.10.1.min.js"></script>
+        <script src="assets/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+
         <style>
             body {
                 padding-top: 50px;
                 padding-bottom: 20px;
             }
         </style>
-        <link rel="stylesheet" href="assets/css/main.css">
-
-        <script src="assets/js/vendor/jquery-1.10.1.min.js"></script>
-        <script src="assets/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
     </head>
     <body>
         <!--[if lt IE 7]>
@@ -133,18 +133,19 @@ function respondeToSql($sql_statement){
             <li><a href="index.html">Home</a></li>
             <li><a href="edit_admin.php">Administration</a></li>
             <li><a href="edit_infotext.php">Infotexte</a></li>
-			<li class="active"><a href="edit_picture.php">Fotos</a></li>
-			<li class="dropdown">
-        <a href="edit_admin.php" class="dropdown-toggle" data-toggle="dropdown">Übersichtskarten <b class="caret"></b></a>
-         <ul class="dropdown-menu">
-          <li><a href="edit_map.php?map_id=1">Halle 1/2</a></li>
-          <li><a href="edit_map.php?map_id=2">KE</a></li>
-              </ul> 
-      </li>
+            <li class="active"><a href="edit_picture.php">Fotos</a></li>
+            <li class="dropdown">
+            <a href="edit_admin.php" class="dropdown-toggle" data-toggle="dropdown">Übersichtskarten <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="edit_map.php?map_id=1">Halle 1/2</a></li>
+              <li><a href="edit_map.php?map_id=2">KE</a></li>
+            </ul>
+            <li><button class="btn btn-success" style="margin-top: 7px;">online</button></li>  
           </ul>
         </div><!--/.navbar-collapse -->
       </div>
     </div>
+
     <script>
       //Main JS
       function togglePictureThumb(span_thumb_id){
@@ -229,7 +230,7 @@ function respondeToSql($sql_statement){
     <!-- List of Photos -->
     <div class="container">
       <section>
-      <h2>Liste der hochgeladenen Fotos || pro Seite?</h2>
+      <h2>Liste der hochgeladenen Fotos</h2>
       <table class="table table-striped table-hover">
         <thead>
           <tr>
