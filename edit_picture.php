@@ -6,13 +6,31 @@ $tools_dir = $DOCUMENT_ROOT . "/tools/";
 include_once($tools_dir . "connect.php");
 include_once($tools_dir . "sql.php");
 $dblk = connect();
+$notifications = array("success" => array(),  "error" => array(), "warning" => array());
 
 //Photo Upload
 if(isset($_POST['Upload'])){
 
   if ($_FILES['fileToUpload']['error'] > 0) {
       //echo "Error: " . $_FILES['fileToUpload']['error'] . "<br />";
-      $error = "Kein Foto ausgewählt";
+      switch ($_FILES['fileToUpload']['error']) {
+        case '1':
+          $error = "Foto ist zu groß";
+          break;
+        case '3':
+          $error = "Foto konnte nicht vollständig hochgeladen werden";
+          break;
+        case '4':
+          $error = "Kein Foto ausgewählt";
+          break;
+        case '7':
+          $error = "Foto konnte nicht gespeichert werden";
+          break;
+        default:
+          $error = "Unbekannter Fehler beim Foto upload. Fehlercode: ".$_FILES['fileToUpload']['error'];
+          break;
+      }
+      array_push($notifications["error"], $error);
   } else {
       // array of valid extensions
       $validExtensions = array('.jpg', '.jpeg', '.gif', '.png');
@@ -27,15 +45,13 @@ if(isset($_POST['Upload'])){
           $photo_name = mysql_real_escape_string($_POST['photo_name']);
           if (move_uploaded_file($_FILES['fileToUpload']['tmp_name'], $destination)) {
             chmod($destination,0644);
-              echo 'File ' .$newName. ' succesfully copied';
-
-              $res = sql("INSERT INTO `db_vcl`.`photo` (`photo_name`, `description`, `path`, `uploaded_at`, `x_position`, `y_position`, `map_id`) 
-                   VALUES ('".$photo_name."', '".$description."', '".$destination."', '".date('Y-m-j')."', NULL, NULL, NULL)");
+            $res = sql("INSERT INTO `db_vcl`.`photo` (`photo_name`, `description`, `path`, `uploaded_at`, `x_position`, `y_position`, `map_id`) 
+              VALUES ('".$photo_name."', '".$description."', '".$destination."', '".date('Y-m-j')."', NULL, NULL, NULL)");
             respondeToSql($res);
           }
       } else {
           //echo 'Bitte wählen Sie ein Bild! (.jpg, .jpeg, .gif, .png)';
-          $error = "Kein Foto ausgewählt";
+          array_push($notifications["error"], "Kein Foto wurde ausgewählt");
       }
   }
 }
@@ -67,22 +83,29 @@ while($row = mysql_fetch_assoc($photos)){
 }
 
 function respondeToSql($sql_statement){
+  global $notifications;
   if(!$sql_statement){
     //internal server error
-    $error = "Ein Fehler ist aufgetreten";
+    array_push($notifications["error"], "Ein Fehler ist aufgetreten");
     http_response_code(500);
   }else if(mysql_affected_rows() == 0){
     //no row affected
-    $warning = "Keine Änderungen vorgenommen";
+    array_push($notifications["warning"], "Keine Änderungen vorgenommen");
     http_response_code(304);
   }
   else{  
     //sql success
-    $success = "Erfolgreich";
+    array_push($notifications["success"], "Erfolgreich");
     http_response_code(200);
   }
 }
 
+//display notifications
+foreach ($notifications as $type => $notfiy_array) {
+  foreach($notfiy_array as $msg){
+    echo "<script>window.onload = function(){setFlash('".$type."','".$msg."')};</script>";
+  }
+}
 ?>
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
