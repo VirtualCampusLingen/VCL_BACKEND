@@ -28,6 +28,7 @@
 	$tools_dir = $DOCUMENT_ROOT . "/tools/";
 	include_once($tools_dir . "connect.php");
 	include_once($tools_dir . "sql.php");
+  include_once($tools_dir . "log.php");
 	$dblk = connect();
 
 	if( !empty($_GET['id']) ) {

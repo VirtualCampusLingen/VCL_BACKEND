@@ -1,2 +1,4 @@
+#Files that won't be tracked with git
 tools/connect.php
 assets/img_360/*
+log/*.txt
