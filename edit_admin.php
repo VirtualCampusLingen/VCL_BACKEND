@@ -10,7 +10,32 @@ include_once($tools_dir . "connect.php");
 include_once($tools_dir . "sql.php");
 $dblk = connect();
 
-  if(isset($_GET['ok'])){
+  if(isset($_GET['mail_submit'])){
+    //Beide eingaben gesetzt
+    if((isset($_GET['mail_1']) && isset($_GET['mail_2'])) && ("" != $_GET['mail_1'] && "" != $_GET['mail_2'])){
+
+      $mail1 = mysql_real_escape_string($_GET['mail_1']);
+      $mail2 = mysql_real_escape_string($_GET['mail_2']);
+      
+      //Sind die Eingaben gleich ?
+      if($mail1 == $mail2){
+          $ok = sql("UPDATE  `admin` SET  `E_Mail` =  '".$mail1."' WHERE  `AdminID` =1");
+          if($ok)
+          {
+            $success = "Email wurde erfolgreich geändert";
+            $mail_admin = $mail1;
+          }
+      }
+      else {
+        $error = "Email stimmen nicht überein!";
+      }
+
+    }
+    else {
+      $error = "Es wurden keine Werte für die Email angegeben!";
+    }
+
+  }else if(isset($_GET['pw_submit'])){
     //Beide eingaben gesetzt
     if((isset($_GET['pw1']) && isset($_GET['pw2'])) && ("" != $_GET['pw1'] && "" != $_GET['pw2'])){
       $pw1 = mysql_real_escape_string($_GET['pw1']);
@@ -33,6 +58,13 @@ $dblk = connect();
       $error = "Es wurden keine Werte für das Passwort angegeben!";
     }
 
+  }
+  
+  if(!isset($mail_admin)){
+    $result = sql("SELECT `E_Mail` FROM `admin` WHERE `AdminID` = 1");
+    while ($row = mysql_fetch_assoc($result)) {
+        $mail_admin = $row['E_Mail'];
+    }
   }
 
 
@@ -79,16 +111,10 @@ $dblk = connect();
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li><a href="index.html">Home</a></li>
-      <li class="active" class="dropdown">
-        <a href="edit_admin.php" class="dropdown-toggle" data-toggle="dropdown">Administration <b class="caret"></b></a>
-         <ul class="dropdown-menu">
-          <li class="active"><a href="edit_admin_pw.php">Passwort ändern</a></li>
-          <li><a href="edit_admin_mail.php">Email ändern</a></li>
-              </ul> 
-      </li>
+            <li class="active"><a href="edit_admin.php">Administration</a></li>
             <li><a href="edit_infotext.php">Infotexte</a></li>
-      <li><a href="edit_picture.php">Fotos</a></li>
-      <li class="dropdown">
+			<li><a href="edit_picture.php">Fotos</a></li>
+			<li class="dropdown">
         <a href="edit_admin.php" class="dropdown-toggle" data-toggle="dropdown">Übersichtskarten <b class="caret"></b></a>
          <ul class="dropdown-menu">
           <li><a href="edit_map.php?map_id=1">Halle 1/2</a></li>
@@ -100,21 +126,33 @@ $dblk = connect();
       </div>
     </div>
 
-    <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron" style="padding: 10px 0px 10px 0px;">
       <div class="container">
-    <h2>Passwort ändern</h2>
+		    <h2>Email des Administrators ändern - zurzeit "<?=$mail_admin?>"</h2>
       </div>
     </div>
 
     <div class="container">
-        <?php if(isset($error)) {?>
+		    <?php if(isset($error)) {?>
         <div style="border:1px solid Red;background-color: #ededed;padding:10px;"><h1><?=$error?><h1></div>
         <?php } ?>
         <?php if(isset($success)) {?>
         <div style="border:1px solid Green;background-color: #ededed;padding:10px;"><h1><?=$success?><h1></div>
         <?php } ?>
     <div>
+		
+		<form class="navbar-form pull-left">  
+		  <b>Neues Email:</b><br/>
+		  <input type="text" class="" name="mail_1" placeholder="Email...">
+		  <br/>
+		  <br/>
+		  <b>Neues Email bestätigen:</b><br/>  
+		  <input type="text" class="" name="mail_2"placeholder="Email...">
+		  <br/>  
+		  <br/>
+		  <button type="submit" class="btn" name="mail_submit" value="edit">Ändern</button>  
+		</form>
+		<br style="clear:both;"/>
     <form class="navbar-form pull-left">  
       <b>Neues Passwort:</b><br/>
       <input type="text" class="" name="pw1" placeholder="Passwort...">
@@ -124,17 +162,18 @@ $dblk = connect();
       <input type="text" class="" name="pw2" placeholder="Passwort...">
       <br/>  
       <br/>
-      <button type="submit" class="btn" name="ok" value="edit">Ändern</button>  
+      <button type="submit" class="btn" name="pw_submit" value="edit">Ändern</button>  
     </form>
     <br style="clear:both;"/>
-    </div>
+		</div>
+
       <hr>
 
       <footer>
         <p>&copy; VCL 2013</p>
       </footer>
     </div> <!-- /container -->        
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="assets/js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
 
         <script src="assets/js/vendor/bootstrap.min.js"></script>

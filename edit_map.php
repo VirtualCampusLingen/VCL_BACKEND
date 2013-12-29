@@ -42,7 +42,7 @@ error_reporting(null);
             <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
         <![endif]-->
     <div class='flash'>
-      <button type='button' class='close' data-dismiss='alert'>&times;</button>
+      <button type='button' class='close' onclick="$('.flash').hide()">&times;</button>
       <div class='flash_msg'></div>
     </div>
 
@@ -59,13 +59,7 @@ error_reporting(null);
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li><a href="index.html">Home</a></li>
-      <li class="dropdown">
-        <a href="edit_admin.php" class="dropdown-toggle" data-toggle="dropdown">Administration <b class="caret"></b></a>
-         <ul class="dropdown-menu">
-          <li><a href="edit_admin_pw.php">Passwort ändern</a></li>
-          <li><a href="edit_admin_mail.php">Email ändern</a></li>
-              </ul> 
-      </li>
+            <li><a href="edit_admin.php">Administration</a></li>
             <li><a href="edit_infotext.php">Infotexte</a></li>
       <li><a href="edit_picture.php">Fotos</a></li>
       <li class="dropdown">
@@ -342,7 +336,8 @@ error_reporting(null);
           });
         }
 
-        function setFlash(type, msg){
+        //deprecated => moved to main.js
+        /*function setFlash(type, msg){
           switch (type){
             case 'success':
               $(".flash").addClass("flash_success")
@@ -355,7 +350,7 @@ error_reporting(null);
               $(".flash").show()
               break;
           }
-        }
+        }*/
       </script> 
 
       <div id="edit_map_content">
