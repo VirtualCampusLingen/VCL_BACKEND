@@ -8,6 +8,7 @@ $DOCUMENT_ROOT = dirname(__FILE__);
 $tools_dir = $DOCUMENT_ROOT . "/tools/";
 include_once($tools_dir . "connect.php");
 include_once($tools_dir . "sql.php");
+include_once($tools_dir . "log.php");
 $dblk = connect();
 
   if(isset($_GET['mail_submit'])){
