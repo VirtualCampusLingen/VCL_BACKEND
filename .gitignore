@@ -1,3 +1,4 @@
-#Files that won't be tracked
+# Files that won't be tracked
 tools/connect.php
-assets/img_360/*
+# Dont track images, keep .gitkeep
+assets/img_360/*.img
