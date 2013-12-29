@@ -1,2 +1,3 @@
+#Files that won't be tracked
 tools/connect.php
 assets/img_360/*
