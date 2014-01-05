@@ -1,4 +1,8 @@
-#Files that won't be tracked with git
+# Files that won't be tracked with git
 tools/connect.php
-assets/img_360/*.img
-log/*.txt
+assets/img_360/*
+log/*
+
+# Do not ignore the following marked with '!'
+!assets/img_360/.gitkeep
+!log/.gitkeep

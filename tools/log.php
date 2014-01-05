@@ -1,6 +1,7 @@
 <?php
 # Logging requests
-$logdatei=fopen("log/logfile.txt","a");
+$log_file = $_SERVER['DOCUMENT_ROOT'].'/log/log.txt';
+$logdatei = fopen($log_file,"a");
 fputs($logdatei,
     date("d.m.Y, H:i:s",time()) .
     ", " . $_SERVER['REMOTE_ADDR'] .

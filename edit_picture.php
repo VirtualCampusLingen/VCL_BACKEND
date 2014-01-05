@@ -83,6 +83,7 @@ while($row = mysql_fetch_assoc($photos)){
   $photo[$index]["photo_name"] = $row["photo_name"];
   $photo[$index]["description"] = $row["description"];
   $photo[$index]["uploaded_at"] = $row["uploaded_at"];
+  $photo[$index]["path"] = $row["path"];
 }
 
 function respondeToSql($sql_statement){
@@ -240,12 +241,12 @@ foreach ($notifications as $type => $notfiy_array) {
               <input type="file" class="form-control" name="fileToUpload" id="fileToUpload">
             </div>
             <div class="form-group">
-              <label class="sr-only" for="description">Description</label>
-              <input class="form-control" id="description" name="description" placeholder="Beschreibung">
-            </div>
-            <div class="form-group">
               <label class="sr-only" for="photo_name">Photoname</label>
               <input class="form-control" id="photo_name" name="photo_name" placeholder="Fotoname">
+            </div>
+            <div class="form-group">
+              <label class="sr-only" for="description">Description</label>
+              <input class="form-control" id="description" name="description" placeholder="Beschreibung">
             </div>
             <input type="submit" class="btn btn-success" value="Hochladen" name="Upload">
           </form>
@@ -277,7 +278,7 @@ foreach ($notifications as $type => $notfiy_array) {
                       <span class='glyphicon glyphicon-picture'></span> anzeigen
                     </button>
                     <span id=picture_thumb_".$key." style='display: none'>
-                      <img src='http://vcl.connectiv.info/admin/assets/img_360/C_01.jpg' width='300px' alt='' class='img-thumbnail'>
+                      <img src='"."/".$value["path"]."' width='300px' alt='' class='img-thumbnail'>
                     </span>
                   </td>
                   <td id='photo_name'>".htmlspecialchars($value["photo_name"])."</td>
